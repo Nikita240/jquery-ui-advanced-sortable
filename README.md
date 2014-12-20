@@ -8,7 +8,7 @@
 
 ###Issues
 - [ ] placeholders sometimes don't trigger the change
-- [ ] when dragging from a non-first selected item,
+- [X] when dragging from a non-first selected item,
 the placeholders end up out of order
 
 ###Needs testing

@@ -267,23 +267,22 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Move selected items near the placeholders
 			$.each(this.selected_items, function(indx, item_obj) {
 
-				//Do not move the current item. The _super takes care of that.
-				if(item_obj.item[0] != that.currentItem[0])
-				{
-					item_obj.item.insertBefore(that.placeholders.first());
+				item_obj.item.insertBefore(that.placeholder);
 
-					//Cleanup selected item css
-					item_obj.item
-						.css({
-							position : "",
-							top      : "",
-							left     : ""
-						});
-				}
+				//Cleanup selected item css
+				item_obj.item
+					.css({
+						position : "",
+						top      : "",
+						left     : ""
+					});
 			});
 
 			//Remove non current placeholders
 			this.placeholders.remove();
+
+			//Prevent _super from trying to move the placeholder again
+			this._noFinalSort = true;
 		}
 
 		this._super(event, noPropagation);
