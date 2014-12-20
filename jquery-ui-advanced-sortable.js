@@ -173,7 +173,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		//_mouseStart() hides currentItem because it's different from the helper.
 		//This compensates for that.
-		that.currentItem.show();
+		that.currentItem.css("display", "");
 
 		//Don't reclone placeholders if they already exist
 		if(that.placeholders)
