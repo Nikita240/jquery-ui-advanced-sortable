@@ -176,7 +176,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		that.currentItem.show();
 
 		//Don't reclone placeholders if they already exist
-		if(that.placeholder)
+		if(that.placeholders)
 			return;
 		
 		var placeholders = [];
@@ -280,6 +280,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			//Remove non current placeholders
 			this.placeholders.remove();
+			this.placeholders = null;
 
 			//Prevent _super from trying to move the placeholder again
 			this._noFinalSort = true;
