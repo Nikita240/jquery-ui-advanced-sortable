@@ -1,5 +1,17 @@
 #WORK IN PROGRESS
 
+###Todo
+- [ ] ctrl, shift and mouse click selection
+- [ ] move helpers into order on sort start
+- [ ] animate start
+- [ ] animate helper change
+- [ ] animated placeholder change
+
+###Issues
+- [ ] placeholders sometimes don't trigger the change
+
+==========
+
 if multiselect is true, 
 helper option is disabled, 
 delay default is changed to 150

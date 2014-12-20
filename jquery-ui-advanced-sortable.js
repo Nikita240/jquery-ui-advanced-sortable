@@ -4,6 +4,8 @@
  * jQuery UI widget that extends sortable functionality.
  * Main features: multiselect, animations
  *
+ * https://github.com/Nikita240/jquery-ui-advanced-sortable
+ *
  * @version  0.0.0
  * @author   Nikita Rushmanov @Nikita240
  * @license  MIT
