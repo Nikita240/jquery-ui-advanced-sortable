@@ -190,33 +190,64 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			//Mark current placeholder
 			if(item_obj.item[0] == that.currentItem[0])
+			{
 				that.placeholder = placeholder_clone;
+
+				//Clone an invisible "reference" placeholder that will be used
+				//as a reference point for placeholder positions after the
+				//current placeholder is moved by _rearrange().
+				placeholders.push(
+					placeholder_clone.clone()
+						.addClass("ui-sortable-placeholder-reference")
+						.css("display", "none")
+						.insertAfter(placeholder_clone)
+				);
+			}
 			//Mark all other placeholders
 			else
 				placeholders.push(placeholder_clone);
 		});
 
 		//Map array of placeholders to a jQuery selector object
-		//http://stackoverflow.com/questions/6867184/turn-array-of-jquery-elements-into-jquery-wrapped-set-of-elements
+		//http://stackoverflow.com/a/6867350/2449639
 		that.placeholders = $(placeholders).map(function () {return this.toArray();} );
 	},
 
 	/**
 	 * Override of ui.sortable _rearrange method.
 	 *
-	 * In multiselect mode, it makes the non-current
-	 * placeholders follow the current placeholder
-	 * around after calling _super.
+	 * In multiselect mode, it rearranges the non-current
+	 * placeholders after the default _rearrange() function
+	 * rearranges the current placeholder.
 	 */
 	_rearrange: function(event, i, a, hardRefresh) {
 
 		this._super(event, i, a, hardRefresh);
 
 		var o = this.options;
+		var that = this;
 
-		//Have the other placeholders follow the main placeholder
+		//Rearrange non-current placeholders
 		if(o.multiselect)
-			this.placeholders.insertAfter(this.placeholder);
+		{
+
+			//The item after the current placeholder that all
+			//placeholders should be placed before.
+			var nextItem = false;
+			this.placeholders.each(function() {
+
+				//If we have reached the current placeholder original
+				//position (the reference), then set the nextItem to 
+				//start inserting after the current placeholder.
+				if($(this).hasClass("ui-sortable-placeholder-reference"))
+					nextItem = that.placeholder.next();
+
+				if(nextItem)
+					nextItem.before($(this));
+				else
+					that.placeholder.before($(this));
+			});
+		}
 	},
 
 	/**
