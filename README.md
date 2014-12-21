@@ -14,6 +14,7 @@ the placeholders end up out of order
 ###Needs testing
 - [ ] Sorting blocks
 - [ ] Revert option
+- [ ] Browsers other than Ubuntu-Chromium (lol)
 
 ###Future Features
 - [ ] Ctrl-Z
@@ -21,6 +22,7 @@ the placeholders end up out of order
 - [ ] Ctrl, shift and mouse click selection
 - [ ] Mouse drag selection (if possible)
 - [ ] Soft snap to grid when near drop point
+- [ ] Multiselect modes for touch screen devices
 
 ==========
 
