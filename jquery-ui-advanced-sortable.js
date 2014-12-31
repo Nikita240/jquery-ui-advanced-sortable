@@ -30,6 +30,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 	_create: function() {
 
 		var o = this.options;
+		this.items_selector = o.items;
 
 		this._super();
 
@@ -38,7 +39,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		{
 			//Change default delay.
 			//This makes it easier to select.
-			if(o.delay == 0)
+			if(o.delay === 0)
 				this.options.delay = 150;
 
 			//Bind select handlers
@@ -82,7 +83,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		var o = this.options;
 		var that = this;
 
-		//if multisort is not enabled, use the default helper
+		//if multiselect is not enabled, use the default helper
 		if(!o.multiselect)
 			return this._super();
 
@@ -102,7 +103,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		//Add the helper to the DOM if that didn't happen already
 		if(!$helper.parents("body").length)
-			$(o.appendTo !== "parent" ? o.appendTo : this.currentItem.parent()).first().prepend($helper);
+			$(o.appendTo !== "parent" ? o.appendTo : this.currentItem.parent()).first().append($helper);
 
 		//Basically, if you grab an unselected item to drag, it will deselect everything else
 		//and only move the current item to the helper
@@ -113,13 +114,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			this.currentItem.addClass(o.selectedClassName);
 		}
-
-		//Create array of selected items
-		this.selected_items = [];	
-		$.each(this.items, function(indx, item_obj) {
-			if(item_obj.item.hasClass(o.selectedClassName))
-				that.selected_items.push(item_obj);
-		});
 
 		//Create placeholders BEFORE we move the items
 		this._createPlaceholder();
@@ -170,6 +164,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			return this._super();
 
 		var that = that || this;
+		that.itemsAndPlaceholders = that.items;
 
 		//_mouseStart() hides currentItem because it's different from the helper.
 		//This compensates for that.
@@ -180,7 +175,52 @@ $.widget("ui.sortable", $.ui.sortable, {
 			return;
 		
 		var placeholders = [];
-		$.each(this.selected_items, function(indx, item_obj) {
+		this.selected_items = [];
+		$.each(this.items, function(indx, item_obj) {
+
+			//If this item has a "selected" class
+			if(item_obj.item.hasClass(o.selectedClassName))
+			{
+				//Add this item to this.selected_items
+				//(clone first, or it will pass by reference)
+				that.selected_items.push($.extend(true, {}, item_obj));
+
+				//Clone placeholder
+				var placeholder_clone = item_obj.item.clone()
+					.removeClass(o.selectedClassName+" ui-sortable-handle")
+					.addClass(o.placeholder)
+					.css("visibility", "hidden")
+					.insertBefore(item_obj.item);
+
+				//Mark current placeholder
+				if(item_obj.item[0] == that.currentItem[0])
+				{
+					that.placeholder = placeholder_clone;
+
+					//Clone an invisible "reference" placeholder that will be used
+					//as a reference point for placeholder positions after the
+					//current placeholder is moved by _rearrange().
+					placeholders.push(
+						placeholder_clone.clone()
+							.addClass("ui-sortable-placeholder-reference")
+							.css("display", "none")
+							.insertAfter(placeholder_clone)
+					);
+				}
+				//Mark all other placeholders
+				else
+				{
+					placeholders.push(placeholder_clone);
+
+					//Change this items reference to point to the placeholder clone
+					//instead of the selected helper.
+					//We do not do this for the currentItem to prevent triggering change
+					//on the current placeholder.
+					item_obj.item = placeholder_clone;
+				}
+			}
+		});
+		/*$.each(this.selected_items, function(indx, item_obj) {
 
 			var placeholder_clone = item_obj.item.clone()
 				.removeClass(o.selectedClassName+" ui-sortable-handle")
@@ -206,7 +246,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Mark all other placeholders
 			else
 				placeholders.push(placeholder_clone);
-		});
+		});*/
 
 		//Map array of placeholders to a jQuery selector object
 		//http://stackoverflow.com/a/6867350/2449639
@@ -219,13 +259,26 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 * In multiselect mode, it rearranges the non-current
 	 * placeholders after the default _rearrange() function
 	 * rearranges the current placeholder.
+	 *
+	 * Additionally, if the rearrange is triggered by a 
+	 * multiselect placeholder, it replaces the i.item
+	 * with the next handle in the DOM.
 	 */
 	_rearrange: function(event, i, a, hardRefresh) {
 
-		this._super(event, i, a, hardRefresh);
-
 		var o = this.options;
 		var that = this;
+		
+		//If the trigger item is a placeholder,
+		//change the trigger item to the next/prev handle
+		//before calling _super().
+		if(o.multiselect && i.item.hasClass(o.placeholder))
+		{
+			i = $.extend(true, {}, i); //Clone i (original is passed by reference)
+			i.item = i.item[this.direction == "up" ? "nextAll" : "prevAll"](".ui-sortable-handle").first();
+		}
+
+		this._super(event, i, a, hardRefresh);
 
 		//Rearrange non-current placeholders
 		if(o.multiselect)
@@ -395,5 +448,27 @@ $.widget("ui.sortable", $.ui.sortable, {
 				left : item_obj.left
 			});
 		});
-	}
+	}//,
+
+	// I forgot why I started writing this...
+	/*_addPlaceholderMirrors: function() {
+
+		var o = this.options;
+		var that = this;
+		var all_items = this.element.find(this.items_selector);
+		var placeholder_indx = all_items.index(this.placeholder);
+		var before = true;
+
+		$.each(this.placeholders, function(indx, placeholder) {
+
+			if(placeholder.hasClass("ui-sortable-placeholder-reference"))
+			{
+				before = false;
+				return;
+			}
+
+
+		});
+	}*/
+
 });

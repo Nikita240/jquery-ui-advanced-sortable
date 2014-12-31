@@ -7,7 +7,7 @@
 - [ ] animated placeholder change
 
 ###Issues
-- [ ] placeholders sometimes don't trigger the change
+- [X] placeholders sometimes don't trigger the change
 - [X] when dragging from a non-first selected item,
 the placeholders end up out of order
 
@@ -41,3 +41,5 @@ options:
 Latest version of jquery-ui known to be compatable: 1.11.2
 
 To enable touch screen compatability use https://github.com/furf/jquery-ui-touch-punch
+
+Something something about wrapping inline-blocks, see http://stackoverflow.com/a/5078297/2449639
