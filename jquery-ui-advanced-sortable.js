@@ -32,6 +32,26 @@ $.widget("ui.sortable", $.ui.sortable, {
 		var o = this.options;
 		this.items_selector = o.items;
 
+		//Initialize animation things
+		if(o.animate)
+		{
+			this.animationCloneContainer = 
+				$("<div>")
+					.attr("class", this.element.attr("class"))
+					.addClass("ui-sortable-animation-clone-container")
+					.css("display", "none");
+			
+			//Add container to DOM.
+			//The container has to be a child of the body
+			//because item positions are calculated using the document offset.
+			$("body").append(this.animationCloneContainer);
+
+			//Animate requires the multiselect overriden methods to work
+			o.multiselect = true;
+
+			this.options.revert = false;
+		}
+
 		this._super();
 
 		//Initialize multiselect things
@@ -47,17 +67,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			this.options.revert = false;
 		}
-
-		//Initialize animation things
-		if(o.animate)
-		{
-			this._createAnimationClones();
-
-			//Animate requires the multiselect overriden methods to work
-			o.multiselect = true;
-
-			this.options.revert = false;
-		}
 	},
 
 	// public methods
@@ -65,6 +74,46 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 
 	// private methods
+
+	/**
+	 * Override of ui.sortable _mouseStart method.
+	 *
+	 * If animated option is set to true, initiliazes animation
+	 * clones.
+	 */
+	_mouseStart: function(event, overrideHandle, noActivation) {
+
+		this._super(event, overrideHandle, noActivation);
+
+		var o = this.options;
+
+		//Initialize animations
+		if(o.animate)
+		{
+
+			//Sync positions
+			this._syncAnimationClonePositions();
+
+			//Show clones
+			this.animationCloneContainer.css("display", "");
+
+			//Hide originals
+			this.element.css("visibility", "hidden");
+		}
+	},
+
+	/**
+	 * Override of ui.sortable _refreshItems method.
+	 *
+	 * If animate option is set to true, it will refresh
+	 * animation clones on refresh.
+	 */
+	_refreshItems: function(event) {
+
+		this._super(event);
+
+		this._refreshAnimationClones();
+	},
 	
 	/**
 	 * Override of ui.sortable _createHelper method.
@@ -94,16 +143,20 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		//Create helper
 		$helper = $("<div>")
-			.css({
-				position: "absolute",
-				top     : offset_margin_delta.top,
-				left    : offset_margin_delta.left
-			})
-			.append($("<div>").css("position", "relative"));
+			.css(offset_margin_delta)
+			.css("position", "absolute")
+			.append(
+				$("<div>")
+					.attr("class", this.element.attr("class"))
+					.css("position", "relative")
+			);
 
 		//Add the helper to the DOM if that didn't happen already
 		if(!$helper.parents("body").length)
-			$(o.appendTo !== "parent" ? o.appendTo : this.currentItem.parent()).first().append($helper);
+		{
+			$helper.appendTo("body");
+			//$(o.appendTo !== "parent" ? o.appendTo : this.currentItem.parent()).first().append($helper);
+		}
 
 		//Basically, if you grab an unselected item to drag, it will deselect everything else
 		//and only move the current item to the helper
@@ -118,7 +171,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		//Create placeholders BEFORE we move the items
 		this._createPlaceholder();
 
-		//Move all selected items into the helper		
+		//Move all selected items into the helper	
 		$.each(this.selected_items, function(indx, item_obj) {
 
 			$helper.find("> div").append(item_obj.item);
@@ -220,33 +273,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 				}
 			}
 		});
-		/*$.each(this.selected_items, function(indx, item_obj) {
-
-			var placeholder_clone = item_obj.item.clone()
-				.removeClass(o.selectedClassName+" ui-sortable-handle")
-				.addClass(o.placeholder)
-				.css("visibility", "hidden")
-				.insertBefore(item_obj.item);
-
-			//Mark current placeholder
-			if(item_obj.item[0] == that.currentItem[0])
-			{
-				that.placeholder = placeholder_clone;
-
-				//Clone an invisible "reference" placeholder that will be used
-				//as a reference point for placeholder positions after the
-				//current placeholder is moved by _rearrange().
-				placeholders.push(
-					placeholder_clone.clone()
-						.addClass("ui-sortable-placeholder-reference")
-						.css("display", "none")
-						.insertAfter(placeholder_clone)
-				);
-			}
-			//Mark all other placeholders
-			else
-				placeholders.push(placeholder_clone);
-		});*/
 
 		//Map array of placeholders to a jQuery selector object
 		//http://stackoverflow.com/a/6867350/2449639
@@ -268,7 +294,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		var o = this.options;
 		var that = this;
-		
+
 		//If the trigger item is a placeholder,
 		//change the trigger item to the next/prev handle
 		//before calling _super().
@@ -400,39 +426,41 @@ $.widget("ui.sortable", $.ui.sortable, {
 	},
 	
 	/**
-	 * Creates clones of sortable handles to be used for animation.
+	 * Refreshes clones of sortable handles to be used for animation.
 	 *
 	 * The clones should be absolutely positioned and be invisible until 
 	 * sorting starts.
 	 */
-	_createAnimationClones: function() {
+	_refreshAnimationClones: function() {
 
-		//Create container for clones.
-		var $container = $("<div>").addClass("ui-sortable-animation-clone-container")
+		var that = this;
+		var o = this.options;
+
+		//Clean container
+		this.animationCloneContainer.empty();
 		
 		//Clone items
 		$.each(this.items, function(indx, item_obj) {
 			
+			//If this item has a "selected" class, do not clone
+			if(item_obj.item.hasClass(o.selectedClassName))
+				return;
+
 			//Create clone
 			var $clone = item_obj.item.clone()
 				.removeClass("ui-sortable-handle")
 				.addClass("ui-sortable-animation-clone")
 				.css({
-					position  : "absolute",
-					visibility: "hidden"
+					position : "absolute",
+					zIndex   : o.zIndex-1
 				});
 
 			//Store reference
 			item_obj.animationClone = $clone;
 
 			//Add to container
-			$container.append($clone);
+			that.animationCloneContainer.append($clone);
 		});
-
-		//Add container to DOM.
-		//The container has to be a child of the body
-		//because item positions are calculated using the document offset.
-		$("body").append($container);
 	},
 
 	/**
@@ -441,34 +469,17 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 */
 	_syncAnimationClonePositions: function() {
 
+		var that = this;
+
 		$.each(this.items, function(indx, item_obj) {
 			
-			item_obj.animationClone.css({
-				top  : item_obj.top,
-				left : item_obj.left
-			});
-		});
-	}//,
-
-	// I forgot why I started writing this...
-	/*_addPlaceholderMirrors: function() {
-
-		var o = this.options;
-		var that = this;
-		var all_items = this.element.find(this.items_selector);
-		var placeholder_indx = all_items.index(this.placeholder);
-		var before = true;
-
-		$.each(this.placeholders, function(indx, placeholder) {
-
-			if(placeholder.hasClass("ui-sortable-placeholder-reference"))
-			{
-				before = false;
+			if(!item_obj.animationClone)
 				return;
-			}
 
+			var offset_margin_delta = that._subtractVectors(item_obj, that.margins);
 
+			item_obj.animationClone.css(offset_margin_delta);
 		});
-	}*/
+	}
 
 });
