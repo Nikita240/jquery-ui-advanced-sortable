@@ -166,7 +166,8 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		this._super(event);
 
-		this._refreshAnimationClones(false);
+		if(this.options.animate)
+			this._refreshAnimationClones(false);
 	},
 	
 	/**
@@ -225,28 +226,28 @@ $.widget("ui.sortable", $.ui.sortable, {
 		//Create placeholders BEFORE we move the items
 		this._createPlaceholder();
 
-		//Move all selected items into the helper	
+		//Move all selected items into the helper
 		$.each(this.selected_items, function(indx, item_obj) {
 
 			$helper.find("> div").append(item_obj.item);
 
-			//Calculate the original delta vector
-			var delta_vector = that._subtractVectors(
-				{
-					top  : item_obj.top,
-					left : item_obj.left
-				}, 
+			//Calculate original position vector
+			var original_vector = that._subtractVectors(
+				item_obj, 
 				that.offset
 			);
 
-			//Position the item to be in the same position as before
-			//it was moved.
-			item_obj.item.css({
-				position : "absolute",
-				top      : delta_vector.top,
-				left     : delta_vector.left
-			});
+			//Move the item to it's "original" position
+			//(this is done so that in the event animations are
+			//enabled, they will move to a new position from where
+			//they started instead of jumping)
+			item_obj.item
+				.css("position", "absolute")
+				.css(original_vector);
 		});
+
+		//Position selected items to be in the same position as their placeholder
+		this._syncHelperPositions();
 
 		return $helper;
 	},
@@ -288,16 +289,19 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//If this item has a "selected" class
 			if(item_obj.item.hasClass(o.selectedClassName))
 			{
-				//Add this item to this.selected_items
-				//(clone first, or it will pass by reference)
-				that.selected_items.push($.extend(true, {}, item_obj));
 
 				//Clone placeholder
 				var placeholder_clone = item_obj.item.clone()
 					.removeClass(o.selectedClassName+" ui-sortable-handle")
 					.addClass(o.placeholder)
 					.css("visibility", "hidden")
-					.insertBefore(item_obj.item);
+					.insertBefore(that.currentItem);
+
+				//Add this item to this.selected_items
+				//(clone first, or it will pass by reference)
+				var item_obj_clone = $.extend(true, {}, item_obj);
+				item_obj_clone.placeholder_ref = placeholder_clone;
+				that.selected_items.push(item_obj_clone);
 
 				//Mark current placeholder
 				if(item_obj.item[0] == that.currentItem[0])
@@ -392,8 +396,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 							.first()
 							.insertAfter(that.placeholder);
 					}
-
-					console.log(that.direction);
 
 					that.placeholder.before($(this));
 				}
@@ -540,6 +542,8 @@ $.widget("ui.sortable", $.ui.sortable, {
 	/**
 	 * Sets the top and left positions of the animation clones
 	 * to match the current position of the items.
+	 *
+	 * @param bool animate Whether or not to animate the position change.
 	 */
 	_syncAnimationClonePositions: function(animate) {
 
@@ -567,6 +571,40 @@ $.widget("ui.sortable", $.ui.sortable, {
 			}
 			else
 				item_obj.animationClone.css(offset_margin_delta);
+		});
+	},
+
+	/**
+	 * Sets the top and left positions of the helpers.
+	 * 
+	 * Does animation if neccessary
+	 */
+	_syncHelperPositions: function() {
+
+		var that = this;
+		var o = this.options;
+
+		$.each(this.selected_items, function(indx, item_obj) {
+
+			//Calculate the placeholder delta vector
+			var delta_vector = that._subtractVectors(
+				item_obj.placeholder_ref.offset(), 
+				that.offset
+			);
+
+			//Position the item to be in the same position as the placeholder
+			if(o.animate)
+			{
+				if(delta_vector != item_obj.item.position()) //Only animate if the position has changed
+				{
+					//Stop current animations
+					item_obj.item.stop(true, false);
+
+					item_obj.item.animate(delta_vector, o.animationSpeed);
+				}
+			}
+			else
+				item_obj.item.css(delta_vector);
 		});
 	}
 

@@ -1,8 +1,8 @@
 #WORK IN PROGRESS
 
 ###Todo
-- [ ] move helpers into order on sort start
-- [ ] animate start
+- [X] move helpers into order on sort start
+- [X] animate start
 - [ ] animate helper change
 - [X] animated placeholder change
 
