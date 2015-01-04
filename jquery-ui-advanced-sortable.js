@@ -86,6 +86,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 */
 	_mouseStart: function(event, overrideHandle, noActivation) {
 
+		//Prevent from click events for selection from going off
+		this.canSelect = false;
+
 		this._super(event, overrideHandle, noActivation);
 
 		var o = this.options;
@@ -205,17 +208,19 @@ $.widget("ui.sortable", $.ui.sortable, {
 		if(!$helper.parents("body").length)
 		{
 			$helper.appendTo("body");
-			//$(o.appendTo !== "parent" ? o.appendTo : this.currentItem.parent()).first().append($helper);
 		}
 
 		//Basically, if you grab an unselected item to drag, it will deselect everything else
 		//and only move the current item to the helper
+		this.noSelect = false;
 		if(!this.currentItem.hasClass(o.selectedClassName))
 		{
 			$.each(this.items, function(indx, item_obj) {
 				item_obj.item.removeClass(o.selectedClassName); });
 
 			this.currentItem.addClass(o.selectedClassName);
+
+			this.noSelect = true;
 		}
 
 		//Create placeholders BEFORE we move the items
@@ -242,7 +247,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		});
 
 		if(this.options.animate)
-			this._refreshAnimationClones(event);
+			this._refreshAnimationClones();
 
 		//Position selected items to be in the same position as their placeholder
 		this._syncHelperPositions();
@@ -267,7 +272,18 @@ $.widget("ui.sortable", $.ui.sortable, {
 		var o = this.options;
 
 		if(!o.multiselect)
-			return this._super();
+		{
+			//Trick the _super into hiding the placeholder
+			if(o.placeholder == "ui-sortable-placeholder")
+				o.placeholder = false;
+			
+			var return_val = this._super();
+
+			if(!o.placeholder)
+				o.placeholder == "ui-sortable-placeholder"
+
+			return return_val;
+		}
 
 		var that = that || this;
 		that.itemsAndPlaceholders = that.items;
@@ -292,8 +308,11 @@ $.widget("ui.sortable", $.ui.sortable, {
 				var placeholder_clone = item_obj.item.clone()
 					.removeClass(o.selectedClassName+" ui-sortable-handle")
 					.addClass(o.placeholder)
-					.css("visibility", "hidden")
 					.insertBefore(that.currentItem);
+
+				//Only hide if default placeholder
+				if(o.placeholder == "ui-sortable-placeholder")
+					placeholder_clone.css("visibility", "hidden")
 
 				//Add this item to this.selected_items
 				//(clone first, or it will pass by reference)
@@ -392,13 +411,32 @@ $.widget("ui.sortable", $.ui.sortable, {
 				if(after)
 					that.placeholder.parent().children().last().after($(this));
 				else if(nextItem)
-					nextItem.before($(this));
+				{
+					//Move the next item before the placeholders
+					//every time a non-current placeholder is moved to after the 
+					//current placeholder if we are moving up.
+					if(!triggeredByPlaceholder && that.direction === "up" && !$(this).hasClass("ui-sortable-placeholder-reference"))
+					{
+						that.placeholder
+							.nextAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
+							.first()
+							.insertAfter(that.placeholder
+											.prevAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
+											.first()
+							);
+					}
+
+					that.placeholder
+						.nextAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
+						.first()
+						.before($(this));
+				}
 				else
 				{
 					//Move the previous item after the current placeholder
 					//every time a non-current placeholder is moved to before the 
 					//current placeholder if we are moving down.
-					if(that.direction === "down" && !triggeredByPlaceholder)
+					if(!triggeredByPlaceholder && that.direction === "down")
 					{
 						that.placeholder
 							.prevAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
@@ -409,10 +447,24 @@ $.widget("ui.sortable", $.ui.sortable, {
 					that.placeholder.before($(this));
 				}
 			});
+
+			this._syncHelperPositions();
 		}
 
 		this._syncAnimationClonePositions(true);
-		this._syncHelperPositions();
+
+		//Refresh positions every time.
+		//This is done because firefox will not clear
+		//the call stack if the mouse is moving and
+		//calling _mouseDrag, so it will prevent _super
+		//from refreshing positions untill the mouse
+		//stops moving, and as a result will recurively
+		//trigger _rearrange because it is still doing
+		//calculations with the old positions.
+		this.refreshPositions(!hardRefresh);
+
+		//Prevent _super's callback from refreshing positions
+		this.counter = this.counter ? ++this.counter : 1;
 	},
 
 	/**
@@ -452,6 +504,12 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			//Prevent _super from trying to move the placeholder again
 			this._noFinalSort = true;
+		}
+
+		//De-select after drag
+		if(this.noSelect)
+		{
+			this.currentItem.removeClass(o.selectedClassName);
 		}
 
 		this._super(event, noPropagation);
@@ -518,10 +576,18 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		$.each(this.items, function(indx, item_obj) {
 
-			item_obj.item.click(function(e) {
+			item_obj.item.mousedown(function(e) {
 
-				//temporary action
-				$(this).toggleClass(o.selectedClassName);
+				that.canSelect = true;
+			});
+
+			item_obj.item.mouseup(function(e) {
+
+				if(that.canSelect)
+				{
+					//temporary action
+					$(this).toggleClass(o.selectedClassName);
+				}
 			});
 		});
 	},
@@ -544,12 +610,18 @@ $.widget("ui.sortable", $.ui.sortable, {
 		$.each(this.items, function(indx, item_obj) {
 			
 			//If this item has a "selected" class, do not clone
-			if(item_obj.item.hasClass(o.selectedClassName))
-				return;
+			/*if(item_obj.item.hasClass(o.selectedClassName))
+				return;*/
+
+			//If this item is the currentItem,
+			//clone the current placeholder instead.
+			if(item_obj.item[0] == that.currentItem[0])
+				var $clone = that.placeholder.clone();
+			else
+				var $clone = item_obj.item.clone();
 
 			//Create clone
-			var $clone = item_obj.item.clone()
-				.removeClass("ui-sortable-handle")
+			$clone.removeClass("ui-sortable-handle")
 				.addClass("ui-sortable-animation-clone")
 				.css({
 					position : "absolute",
@@ -580,11 +652,18 @@ $.widget("ui.sortable", $.ui.sortable, {
 			if(!item_obj.animationClone)
 				return;
 
+			//If this item is the currentItem,
+			//use the current placeholder instead.
+			if(item_obj.item[0] == that.currentItem[0])
+				var reference_element = that.placeholder;
+			else
+				var reference_element = item_obj.item;
+
 			var margins = {
-				left: (parseInt(item_obj.item.css("marginLeft"),10) || 0),
-				top: (parseInt(item_obj.item.css("marginTop"),10) || 0)
+				left: (parseInt(reference_element.css("marginLeft"),10) || 0),
+				top: (parseInt(reference_element.css("marginTop"),10) || 0)
 			};
-			var offset_margin_delta = that._subtractVectors(item_obj.item.offset(), margins);
+			var offset_margin_delta = that._subtractVectors(reference_element.offset(), margins);
 
 			//Stop current clone animations
 			item_obj.animationClone.stop(true, false);

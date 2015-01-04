@@ -17,11 +17,18 @@ the placeholders end up out of order
 during _rearrange()
 - [X] _rearrange throws exception or gets stuck in a loop when
 triggered by a placeholder that doesn't have an item before or after it
+- [X] FIREFOX IS FUCKED, MASSIVE LAG
 
 ###Needs testing
 - [ ] Sorting blocks
 - [X] Revert option
 - [ ] Browsers other than Ubuntu-Chromium (lol)
+	- [X] Firefox
+	- [ ] IE10-11 (sigh...)
+	- [ ] Safari
+	- [ ] Android chrome
+	- [ ] iOS Safari
+	- [ ] Chrome on MacOS and Windows 8
 - [X] multisort without animated
 - [X] animated without multisort
 - [X] different tolerances

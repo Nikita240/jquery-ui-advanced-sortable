@@ -1,7 +1,12 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 	<head>
+
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+
 		<!-- Don't use .min plugins since this is for testing. -->
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.js"></script>
 		<script src="jquery-ui-1.11.2.custom/jquery-ui.js"></script>
@@ -15,6 +20,7 @@
 					animate: true,
 					multiselect: true,
 					tolerance: "pointer",
+					placeholder: "placeholder",
 					//Watch the console to make sure we are not triggering
 					//unnecessary change events.
 					change: function() { console.log("Change"); }
@@ -57,6 +63,13 @@
 			{
 				border-color: #d9534f;
 				color: #d9534f;
+			}
+
+			div.sortable span.placeholder
+			{
+				border-color: transparent;
+				color: transparent;
+				box-shadow: 0px 0px 5px 5px rgb(200,200,200);
 			}
 
 		</style>
