@@ -431,6 +431,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 * In multiselect mode, it moves the non-current
 	 * helpers before the placeholders and deletes the
 	 * non-current placeholders before calling _super.
+	 *
+	 * In animation mode it hides animation clones
+	 * and shows the originals.
 	 */
 	_clear: function(event, noPropagation) {
 
@@ -470,6 +473,18 @@ $.widget("ui.sortable", $.ui.sortable, {
 			left     : "",
 			display  : ""
 		});
+
+		var o = this.options;
+
+		//Clear animations
+		if(o.animate)
+		{
+			//Hide clones
+			this.animationCloneContainer.css("display", "none");
+
+			//Show originals
+			this.element.css("visibility", "");
+		}
 	},	
 
 	/**

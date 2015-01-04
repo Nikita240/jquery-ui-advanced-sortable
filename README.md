@@ -5,7 +5,8 @@
 - [X] animate start
 - [X] animate helper change
 - [X] animated placeholder change
-- [ ] drop when animating
+- [X] drop when animating
+- [ ] fix revert
 
 ###Issues
 - [X] placeholders sometimes don't trigger the change
@@ -45,7 +46,7 @@ options:
 - animationSpeed (default=500)
 - pointerVelocityThreshold (default=0.5)
 
-Latest version of jquery-ui known to be compatable: 1.11.2
+Latest version of jquery-ui tested to be compatable: 1.11.2
 
 To enable touch screen compatability use https://github.com/furf/jquery-ui-touch-punch
 
