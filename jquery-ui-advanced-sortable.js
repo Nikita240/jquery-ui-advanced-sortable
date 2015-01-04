@@ -15,7 +15,6 @@
 $.widget("ui.sortable", $.ui.sortable, {
 	options: {
 		animate: false,
-		animationSpeed: 500,
 		pointerVelocityThreshold: 0.5,
 		multiselect: false,
 		selectedClassName: "selected",
@@ -37,6 +36,12 @@ $.widget("ui.sortable", $.ui.sortable, {
 		//Initialize animation things
 		if(o.animate)
 		{
+			if(typeof o.animate === "boolean")
+				o.animate = 500;
+
+			if(typeof o.revert === "boolean")
+				o.revert = o.animate;
+
 			this.animationCloneContainer = 
 				$("<div>")
 					.attr("class", this.element.attr("class"))
@@ -50,8 +55,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			//Animate requires the multiselect overriden methods to work
 			o.multiselect = true;
-
-			this.options.revert = false;
 		}
 
 		this._super();
@@ -66,8 +69,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			//Bind select handlers
 			this._bindSelectHandler();
-
-			this.options.revert = false;
 		}
 	},
 
@@ -602,7 +603,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			if(animate)
 			{
 				if(offset_margin_delta != item_obj.animationClone.position()) // only animate if the position has changed
-					item_obj.animationClone.animate(offset_margin_delta, o.animationSpeed);
+					item_obj.animationClone.animate(offset_margin_delta, o.animate);
 			}
 			else
 				item_obj.animationClone.css(offset_margin_delta);
@@ -640,7 +641,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 					//Stop current animations
 					item_obj.item.stop(true, false);
 
-					item_obj.item.animate(delta_vector, o.animationSpeed);
+					item_obj.item.animate(delta_vector, o.animate);
 				}
 			}
 			else

@@ -6,7 +6,8 @@
 - [X] animate helper change
 - [X] animated placeholder change
 - [X] drop when animating
-- [ ] fix revert
+- [X] fix revert
+- [ ] make animate work without multiselect
 
 ###Issues
 - [X] placeholders sometimes don't trigger the change
@@ -19,8 +20,10 @@ triggered by a placeholder that doesn't have an item before or after it
 
 ###Needs testing
 - [ ] Sorting blocks
-- [ ] Revert option
+- [X] Revert option
 - [ ] Browsers other than Ubuntu-Chromium (lol)
+- [ ] multisort without animated
+- [ ] animated without multisort
 
 ###Future Features
 - [ ] Ctrl-Z
@@ -36,14 +39,14 @@ if multiselect is true,
 helper option is disabled, 
 delay default is changed to 150
 
-revert option doesn't work for multisort OR animated
+if animated is true,
+revert default is changed to equal animate
 
 options:
 
-- animated (default=false)
+- animate (default=false) (set to 500 if true)
 - multisort (default=false)
 - selectedClassName (default=selected)
-- animationSpeed (default=500)
 - pointerVelocityThreshold (default=0.5)
 
 Latest version of jquery-ui tested to be compatable: 1.11.2
