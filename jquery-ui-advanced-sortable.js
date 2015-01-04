@@ -15,6 +15,8 @@
 $.widget("ui.sortable", $.ui.sortable, {
 	options: {
 		animate: false,
+		animationSpeed: 500,
+		pointerVelocityThreshold: 0.5,
 		multiselect: false,
 		selectedClassName: "selected",
 		placeholder: "ui-sortable-placeholder"
@@ -72,7 +74,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 	// public methods
 
 
-
 	// private methods
 
 	/**
@@ -103,6 +104,59 @@ $.widget("ui.sortable", $.ui.sortable, {
 	},
 
 	/**
+	 * Override of ui.sortable _mouseDrag method.
+	 *
+	 * If animated option is set to true, it will only call _super
+	 * if the mouse velocity is below a threshold.
+	 */
+	_mouseDrag: function(event) {
+
+		var o = this.options;
+
+		if(!this.lastMouseDragEvent)
+			this.lastMouseDragEvent = event;
+
+		//calculate velocity
+		this.v = Math.sqrt(
+					Math.pow(this.lastMouseDragEvent.pageX-event.pageX, 2) 
+					+ Math.pow(this.lastMouseDragEvent.pageY-event.pageY, 2)
+				) / (event.timeStamp - this.lastMouseDragEvent.timeStamp);
+
+		this.lastMouseDragEvent = event;
+		
+		this._super(event);
+	},
+
+	/**
+	 * Override of ui.sortable _intersectsWithPointer method.
+	 *
+	 * If animations are on, it will prevent triggering
+	 * of change unless the velocity threshold is met.
+	 *
+	 * Additionally, because of the velocity threshold, it is
+	 * possible for the _super method to get the direction wrong,
+	 * so this will attempt to calculate the direction using 
+	 * element order, and if it fails, it will fallback to 
+	 * the _super's return.
+	 */
+	_intersectsWithPointer: function(item) {
+
+		if(this.v > this.options.pointerVelocityThreshold)
+			return false;
+
+		var fallback = this._super(item);
+
+		if(!fallback)
+			return false;
+		else if(this.placeholder.prevAll().filter(item.item).length !== 0)
+			return 1;
+		else if(this.placeholder.nextAll().filter(item.item).length !== 0)
+			return 2;
+		else
+			return fallback;
+	},
+
+	/**
 	 * Override of ui.sortable _refreshItems method.
 	 *
 	 * If animate option is set to true, it will refresh
@@ -112,7 +166,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		this._super(event);
 
-		this._refreshAnimationClones();
+		this._refreshAnimationClones(false);
 	},
 	
 	/**
@@ -294,6 +348,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		var o = this.options;
 		var that = this;
+		var triggeredByPlaceholder = false;
 
 		//If the trigger item is a placeholder,
 		//change the trigger item to the next/prev handle
@@ -301,7 +356,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 		if(o.multiselect && i.item.hasClass(o.placeholder))
 		{
 			i = $.extend(true, {}, i); //Clone i (original is passed by reference)
-			i.item = i.item[this.direction == "up" ? "nextAll" : "prevAll"](".ui-sortable-handle").first();
+			i.item = i.item[this.direction === "up" ? "nextAll" : "prevAll"](".ui-sortable-handle").first();
+
+			triggeredByPlaceholder = true;
 		}
 
 		this._super(event, i, a, hardRefresh);
@@ -324,9 +381,26 @@ $.widget("ui.sortable", $.ui.sortable, {
 				if(nextItem)
 					nextItem.before($(this));
 				else
+				{
+					//Move the previous item after the current placeholder
+					//every time a non-current placeholder is moved to before the 
+					//current placeholder if we are moving down.
+					if(that.direction === "down" && !triggeredByPlaceholder)
+					{
+						that.placeholder
+							.prevAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
+							.first()
+							.insertAfter(that.placeholder);
+					}
+
+					console.log(that.direction);
+
 					that.placeholder.before($(this));
+				}
 			});
 		}
+
+		this._syncAnimationClonePositions(true);
 	},
 
 	/**
@@ -467,18 +541,32 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 * Sets the top and left positions of the animation clones
 	 * to match the current position of the items.
 	 */
-	_syncAnimationClonePositions: function() {
+	_syncAnimationClonePositions: function(animate) {
 
 		var that = this;
+		var o = this.options;
 
 		$.each(this.items, function(indx, item_obj) {
 			
 			if(!item_obj.animationClone)
 				return;
 
-			var offset_margin_delta = that._subtractVectors(item_obj, that.margins);
+			var margins = {
+				left: (parseInt(item_obj.item.css("marginLeft"),10) || 0),
+				top: (parseInt(item_obj.item.css("marginTop"),10) || 0)
+			};
+			var offset_margin_delta = that._subtractVectors(item_obj.item.offset(), margins);
 
-			item_obj.animationClone.css(offset_margin_delta);
+			//Stop current clone animations
+			item_obj.animationClone.stop(true, false);
+
+			if(animate)
+			{
+				if(offset_margin_delta != item_obj.animationClone.position()) // only animate if the position has changed
+					item_obj.animationClone.animate(offset_margin_delta, o.animationSpeed);
+			}
+			else
+				item_obj.animationClone.css(offset_margin_delta);
 		});
 	}
 

@@ -4,12 +4,14 @@
 - [ ] move helpers into order on sort start
 - [ ] animate start
 - [ ] animate helper change
-- [ ] animated placeholder change
+- [X] animated placeholder change
 
 ###Issues
 - [X] placeholders sometimes don't trigger the change
 - [X] when dragging from a non-first selected item,
 the placeholders end up out of order
+- [X] placeholders insert themselves in wrong positions
+during _rearrange()
 
 ###Needs testing
 - [ ] Sorting blocks
@@ -37,6 +39,8 @@ options:
 - animated (default=false)
 - multisort (default=false)
 - selectedClassName (default=selected)
+- animationSpeed (default=500)
+- pointerVelocityThreshold (default=0.5)
 
 Latest version of jquery-ui known to be compatable: 1.11.2
 
