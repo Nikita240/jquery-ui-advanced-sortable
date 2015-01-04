@@ -15,7 +15,7 @@
 $.widget("ui.sortable", $.ui.sortable, {
 	options: {
 		animate: false,
-		pointerVelocityThreshold: 0.5,
+		pointerVelocityThreshold: 0.35,
 		multiselect: false,
 		selectedClassName: "selected",
 		placeholder: "ui-sortable-placeholder"
@@ -52,9 +52,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//The container has to be a child of the body
 			//because item positions are calculated using the document offset.
 			$("body").append(this.animationCloneContainer);
-
-			//Animate requires the multiselect overriden methods to work
-			o.multiselect = true;
 		}
 
 		this._super();
@@ -68,8 +65,12 @@ $.widget("ui.sortable", $.ui.sortable, {
 				this.options.delay = 150;
 
 			//Bind select handlers
-			this._bindSelectHandler();
+			this._bindSelectHandlers();
 		}
+
+		//Animate requires the multiselect overriden methods to work
+		if(o.animate)
+			o.multiselect = true;
 	},
 
 	// public methods
@@ -92,7 +93,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 		//Initialize animations
 		if(o.animate)
 		{
-
 			//Sync positions
 			this._syncAnimationClonePositions();
 
@@ -163,20 +163,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 			return false;
 
 		return intersection;
-	},
-
-	/**
-	 * Override of ui.sortable _refreshItems method.
-	 *
-	 * If animate option is set to true, it will refresh
-	 * animation clones on refresh.
-	 */
-	_refreshItems: function(event) {
-
-		this._super(event);
-
-		if(this.options.animate)
-			this._refreshAnimationClones(false);
 	},
 	
 	/**
@@ -254,6 +240,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 				.css("position", "absolute")
 				.css(original_vector);
 		});
+
+		if(this.options.animate)
+			this._refreshAnimationClones(event);
 
 		//Position selected items to be in the same position as their placeholder
 		this._syncHelperPositions();
@@ -522,7 +511,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 * Single clicking will deselect all and select
 	 * current.
 	 */
-	_bindSelectHandler: function() {
+	_bindSelectHandlers: function() {
 
 		var o = this.options;
 		var that = this;
@@ -543,7 +532,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 * The clones should be absolutely positioned and be invisible until 
 	 * sorting starts.
 	 */
-	_refreshAnimationClones: function() {
+	_refreshAnimationClones: function(event) {
 
 		var that = this;
 		var o = this.options;

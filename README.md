@@ -7,7 +7,7 @@
 - [X] animated placeholder change
 - [X] drop when animating
 - [X] fix revert
-- [ ] make animate work without multiselect
+- [X] make animate work without multiselect
 
 ###Issues
 - [X] placeholders sometimes don't trigger the change
@@ -22,8 +22,9 @@ triggered by a placeholder that doesn't have an item before or after it
 - [ ] Sorting blocks
 - [X] Revert option
 - [ ] Browsers other than Ubuntu-Chromium (lol)
-- [ ] multisort without animated
-- [ ] animated without multisort
+- [X] multisort without animated
+- [X] animated without multisort
+- [X] different tolerances
 
 ###Future Features
 - [ ] Ctrl-Z
@@ -32,6 +33,7 @@ triggered by a placeholder that doesn't have an item before or after it
 - [ ] Mouse drag selection (if possible)
 - [ ] Soft snap to grid when near drop point
 - [ ] Multiselect modes for touch screen devices
+- [ ] Hover time threshold (difficult, put in backburner)
 
 ==========
 
@@ -47,7 +49,7 @@ options:
 - animate (default=false) (set to 500 if true)
 - multisort (default=false)
 - selectedClassName (default=selected)
-- pointerVelocityThreshold (default=0.5)
+- pointerVelocityThreshold (default=0.35)
 
 Latest version of jquery-ui tested to be compatable: 1.11.2
 
