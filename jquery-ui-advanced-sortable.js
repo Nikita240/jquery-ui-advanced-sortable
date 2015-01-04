@@ -403,6 +403,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		}
 
 		this._syncAnimationClonePositions(true);
+		this._syncHelperPositions();
 	},
 
 	/**
@@ -575,9 +576,11 @@ $.widget("ui.sortable", $.ui.sortable, {
 	},
 
 	/**
-	 * Sets the top and left positions of the helpers.
+	 * Sets the top and left positions of the helpers to be
+	 * at the same vector relative to the current helper as 
+	 * the placeholders.
 	 * 
-	 * Does animation if neccessary
+	 * Does animation if neccessary.
 	 */
 	_syncHelperPositions: function() {
 
@@ -586,10 +589,13 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		$.each(this.selected_items, function(indx, item_obj) {
 
-			//Calculate the placeholder delta vector
+			//Calculate the delta vector
 			var delta_vector = that._subtractVectors(
-				item_obj.placeholder_ref.offset(), 
-				that.offset
+				that.currentItem.position(),
+				that._subtractVectors( 
+					that.placeholder.offset(),
+					item_obj.placeholder_ref.offset()
+				)
 			);
 
 			//Position the item to be in the same position as the placeholder

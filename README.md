@@ -3,8 +3,9 @@
 ###Todo
 - [X] move helpers into order on sort start
 - [X] animate start
-- [ ] animate helper change
+- [X] animate helper change
 - [X] animated placeholder change
+- [ ] drop when animating
 
 ###Issues
 - [X] placeholders sometimes don't trigger the change
@@ -12,6 +13,8 @@
 the placeholders end up out of order
 - [X] placeholders insert themselves in wrong positions
 during _rearrange()
+- [ ] _rearrange throws exception or gets stuck in a loop when
+triggered by a placeholder that doesn't have an item before or after it
 
 ###Needs testing
 - [ ] Sorting blocks
