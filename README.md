@@ -13,7 +13,7 @@
 the placeholders end up out of order
 - [X] placeholders insert themselves in wrong positions
 during _rearrange()
-- [ ] _rearrange throws exception or gets stuck in a loop when
+- [X] _rearrange throws exception or gets stuck in a loop when
 triggered by a placeholder that doesn't have an item before or after it
 
 ###Needs testing

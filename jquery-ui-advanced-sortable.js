@@ -144,16 +144,24 @@ $.widget("ui.sortable", $.ui.sortable, {
 		if(this.v > this.options.pointerVelocityThreshold)
 			return false;
 
-		var fallback = this._super(item);
+		var intersection = this._super(item);
 
-		if(!fallback)
-			return false;
-		else if(this.placeholder.prevAll().filter(item.item).length !== 0)
-			return 1;
+		//If the _super returned false, we return false too
+		if(!intersection)
+			return intersection;
+
+		//We attempt to calculate our own intersection direction
+		if(this.placeholder.prevAll().filter(item.item).length !== 0)
+			intersection = 1;
 		else if(this.placeholder.nextAll().filter(item.item).length !== 0)
-			return 2;
-		else
-			return fallback;
+			intersection = 2;
+
+		//Prevent triggering rearrange if there isn't an item to swap with
+		if(item.item.hasClass(this.options.placeholder) &&
+			!item.item[intersection === 1 ? "prevAll" : "nextAll" ](".ui-sortable-handle").first().length)
+			return false;
+
+		return intersection;
 	},
 
 	/**
@@ -374,15 +382,26 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//The item after the current placeholder that all
 			//placeholders should be placed before.
 			var nextItem = false;
+			var after = false;
 			this.placeholders.each(function() {
 
 				//If we have reached the current placeholder original
 				//position (the reference), then set the nextItem to 
 				//start inserting after the current placeholder.
 				if($(this).hasClass("ui-sortable-placeholder-reference"))
+				{
 					nextItem = that.placeholder.next();
 
-				if(nextItem)
+					//Fallback, if there is no next item,
+					//then just insert after the last sibling
+					if(!nextItem.length)
+						after = true;
+				}
+
+
+				if(after)
+					that.placeholder.parent().children().last().after($(this));
+				else if(nextItem)
 					nextItem.before($(this));
 				else
 				{
