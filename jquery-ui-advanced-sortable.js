@@ -573,6 +573,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			item_obj.item.mousedown(function(e) {
 
+				//If sorting starts after this mousedown event,
+				//then that.canSelect will be set to false later
+				//so that selection will not be triggered on mouseup.
 				that.canSelect = true;
 			});
 

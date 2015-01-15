@@ -1,13 +1,14 @@
 #WORK IN PROGRESS
 
 ###Todo
-- [X] move helpers into order on sort start
-- [X] animate start
-- [X] animate helper change
-- [X] animated placeholder change
-- [X] drop when animating
-- [X] fix revert
-- [X] make animate work without multiselect
+- [ ] Ctrl-Z and History
+- [ ] Automatic indexing
+- [X] Ctrl, shift and mouse click selection
+- [ ] Select and deselect callable methods
+- [ ] Multiselect option to disable default selection handlers
+- [ ] Multiselect option for single click selection
+- [ ] Soft snap to grid when near drop point
+- [ ] Multiselect modes for touch screen devices
 
 ###Issues
 - [X] placeholders sometimes don't trigger the change
@@ -18,6 +19,7 @@ during _rearrange()
 - [X] _rearrange throws exception or gets stuck in a loop when
 triggered by a placeholder that doesn't have an item before or after it
 - [X] FIREFOX IS FUCKED, MASSIVE LAG
+- [ ] touch screen sorting doesn't work if animated or multiselect is true
 
 ###Needs testing
 - [X] Sorting blocks
@@ -33,18 +35,6 @@ triggered by a placeholder that doesn't have an item before or after it
 - [X] multisort without animated
 - [X] animated without multisort
 - [X] different tolerances
-
-###Future Features
-- [ ] Ctrl-Z
-- [ ] Automatic indexing
-- [X] Ctrl, shift and mouse click selection
-- [ ] Select and deselect callable methods
-- [ ] Multiselect option to disable default selection handlers
-- [ ] Multiselect option for single click selection
-- [ ] Mouse drag selection (if possible)
-- [ ] Soft snap to grid when near drop point
-- [ ] Multiselect modes for touch screen devices
-- [ ] Hover time threshold (difficult, put in backburner)
 
 ==========
 
@@ -62,7 +52,7 @@ options:
 - selectedClassName (default=selected)
 - pointerVelocityThreshold (default=0.35)
 
-Latest version of jquery-ui tested to be compatable: 1.11.2
+Latest version of jquery-ui tested for compatability: 1.11.2
 
 To enable touch screen compatability use https://github.com/furf/jquery-ui-touch-punch
 
