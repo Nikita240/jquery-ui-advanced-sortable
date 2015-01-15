@@ -67,6 +67,10 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Bind select handlers
 			this._bindSelectHandlers();
 		}
+		else
+		{
+			this.noSelect = true;
+		}
 
 		//Animate requires the multiselect overriden methods to work
 		if(o.animate)
@@ -210,18 +214,11 @@ $.widget("ui.sortable", $.ui.sortable, {
 			$helper.appendTo("body");
 		}
 
-		//Basically, if you grab an unselected item to drag, it will deselect everything else
-		//and only move the current item to the helper
-		this.noSelect = false;
+		//Basically, if you grab an unselected item to drag,
+		//it will perform a single click event on the 
+		//grabbed item so that we have something selected.
 		if(!this.currentItem.hasClass(o.selectedClassName))
-		{
-			$.each(this.items, function(indx, item_obj) {
-				item_obj.item.removeClass(o.selectedClassName); });
-
-			this.currentItem.addClass(o.selectedClassName);
-
-			this.noSelect = true;
-		}
+			this._singleClick(e);
 
 		//Create placeholders BEFORE we move the items
 		this._createPlaceholder();
@@ -506,11 +503,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 			this._noFinalSort = true;
 		}
 
-		//De-select after drag
+		//De-select after drag if multiselect is off
 		if(this.noSelect)
-		{
 			this.currentItem.removeClass(o.selectedClassName);
-		}
 
 		this._super(event, noPropagation);
 
@@ -583,13 +578,98 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			item_obj.item.mouseup(function(e) {
 
-				if(that.canSelect)
+				if(!that.canSelect)
+					return;
+
+				if(e.shiftKey)
 				{
-					//temporary action
-					$(this).toggleClass(o.selectedClassName);
+					//If there isn't a point to start the shift select,
+					//fallback to single select.
+					if(!that.selectBeggining)
+						that._singleClick(e);
+					else
+						that._shiftClick(e);
+				}
+				else if(e.ctrlKey)
+				{
+					that._ctrlClick(e);
+				}
+				else
+				{
+					that._singleClick(e);
 				}
 			});
 		});
+	},
+
+	/**
+	 * Handles shift click selection
+	 *
+	 * @param {Event} e The event object from the click event.
+	 */
+	_shiftClick: function(e) {
+
+		var that = this;
+		var o = this.options;
+		var $target = $(e.target);
+
+		//Deselect everything
+		$.each(this.items, function(indx, item_obj) {
+			item_obj.item.removeClass(o.selectedClassName); });
+
+		//Select everything inbetween inclusevely
+		var select = false;
+		$.each(this.items, function(indx, item_obj) {
+
+			if(item_obj.item[0] == that.selectBeggining[0] || 
+				item_obj.item[0] == $target[0])
+			{
+				select = !select;
+
+				item_obj.item.addClass(o.selectedClassName);
+
+				return;
+			}
+
+			if(select)
+				item_obj.item.addClass(o.selectedClassName);
+		});
+
+	},
+
+	/**
+	 * Handles ctrl click selection
+	 *
+	 * @param {Event} e The event object from the click event.
+	 */
+	_ctrlClick: function(e) {
+
+		var o = this.options;
+		var $target = $(e.target);
+
+		//Toggle selection of clicked item
+		$target.toggleClass(o.selectedClassName);
+	},
+
+	/**
+	 * Handles click selection
+	 *
+	 * @param {Event} e The event object from the click event.
+	 */
+	_singleClick: function(e) {
+
+		var o = this.options;
+		var $target = $(e.target);
+
+		//Deselect everything
+		$.each(this.items, function(indx, item_obj) {
+			item_obj.item.removeClass(o.selectedClassName); });
+
+		//Select clicked item
+		$target.addClass(o.selectedClassName);
+
+		//Mark the clicked item as the "beggining" of shift selects
+		this.selectBeggining = $target;
 	},
 	
 	/**

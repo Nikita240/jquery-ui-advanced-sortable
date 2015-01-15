@@ -20,11 +20,12 @@ triggered by a placeholder that doesn't have an item before or after it
 - [X] FIREFOX IS FUCKED, MASSIVE LAG
 
 ###Needs testing
-- [ ] Sorting blocks
+- [X] Sorting blocks
 - [X] Revert option
 - [ ] Browsers other than Ubuntu-Chromium (lol)
 	- [X] Firefox
 	- [ ] IE10-11 (sigh...)
+	- [ ] IE8 *kills self*
 	- [ ] Safari
 	- [ ] Android chrome
 	- [ ] iOS Safari
@@ -36,7 +37,10 @@ triggered by a placeholder that doesn't have an item before or after it
 ###Future Features
 - [ ] Ctrl-Z
 - [ ] Automatic indexing
-- [ ] Ctrl, shift and mouse click selection
+- [X] Ctrl, shift and mouse click selection
+- [ ] Select and deselect callable methods
+- [ ] Multiselect option to disable default selection handlers
+- [ ] Multiselect option for single click selection
 - [ ] Mouse drag selection (if possible)
 - [ ] Soft snap to grid when near drop point
 - [ ] Multiselect modes for touch screen devices
@@ -54,7 +58,7 @@ revert default is changed to equal animate
 options:
 
 - animate (default=false) (set to 500 if true)
-- multisort (default=false)
+- multiselect (default=false)
 - selectedClassName (default=selected)
 - pointerVelocityThreshold (default=0.35)
 
