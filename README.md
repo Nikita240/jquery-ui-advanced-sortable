@@ -6,9 +6,8 @@
 - [X] Ctrl, shift and mouse click selection
 - [ ] Select and deselect callable methods
 - [ ] Multiselect option to disable default selection handlers
-- [ ] Multiselect option for single click selection
+- [ ] Multiselect modes where you can single click and drag select
 - [ ] Soft snap to grid when near drop point
-- [ ] Multiselect modes for touch screen devices
 
 ###Issues
 - [X] placeholders sometimes don't trigger the change
@@ -19,7 +18,9 @@ during _rearrange()
 - [X] _rearrange throws exception or gets stuck in a loop when
 triggered by a placeholder that doesn't have an item before or after it
 - [X] FIREFOX IS FUCKED, MASSIVE LAG
-- [ ] touch screen sorting doesn't work if animated or multiselect is true
+- [ ] touch screen sorting doesn't work if animated or multiselect is true.
+Issue only occurs in Chrome. It's also different on Ubuntu and Windows.
+See https://github.com/furf/jquery-ui-touch-punch/issues/212
 
 ###Needs testing
 - [X] Sorting blocks
