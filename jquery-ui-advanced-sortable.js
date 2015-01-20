@@ -21,6 +21,16 @@ $.widget("ui.sortable", $.ui.sortable, {
 		placeholder: "ui-sortable-placeholder"
 	},
 
+	// constants
+	
+	DEFAULT_ANIMATION_DURATION:           500,
+	DEFAULT_MULTISELECT_DELAY:            150,
+	DEFAULT_PLACEHOLDER_CLASS_NAME:       "ui-sortable-placeholder",
+	PLACEHOLDER_REFERENCE_CLASS_NAME:     "ui-sortable-placeholder-reference",
+	ANIMATION_CLONE_CLASS_NAME:           "ui-sortable-animation-clone",
+	ANIMATION_CLONE_CONTAINER_CLASS_NAME: "ui-sortable-animation-clone-container",
+	SORTABLE_HANDLE_CLASS_NAME:           "ui-sortable-handle",
+
 	// default methods
 
 	/**
@@ -37,7 +47,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		if(o.animate)
 		{
 			if(typeof o.animate === "boolean")
-				o.animate = 500;
+				o.animate = this.DEFAULT_ANIMATION_DURATION;
 
 			if(typeof o.revert === "boolean")
 				o.revert = o.animate;
@@ -45,7 +55,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			this.animationCloneContainer = 
 				$("<div>")
 					.attr("class", this.element.attr("class"))
-					.addClass("ui-sortable-animation-clone-container")
+					.addClass(this.ANIMATION_CLONE_CONTAINER_CLASS_NAME)
 					.css("display", "none");
 			
 			//Add container to DOM.
@@ -62,7 +72,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Change default delay.
 			//This makes it easier to select.
 			if(o.delay === 0)
-				this.options.delay = 150;
+				this.options.delay = this.DEFAULT_MULTISELECT_DELAY;
 
 			//Bind select handlers
 			this._bindSelectHandlers();
@@ -166,7 +176,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		//Prevent triggering rearrange if there isn't an item to swap with
 		if(item.item.hasClass(this.options.placeholder) &&
-			!item.item[intersection === 1 ? "prevAll" : "nextAll" ](".ui-sortable-handle").first().length)
+			!item.item[intersection === 1 ? "prevAll" : "nextAll" ]("."+this.SORTABLE_HANDLE_CLASS_NAME).first().length)
 			return false;
 
 		return intersection;
@@ -271,13 +281,13 @@ $.widget("ui.sortable", $.ui.sortable, {
 		if(!o.multiselect)
 		{
 			//Trick the _super into hiding the placeholder
-			if(o.placeholder == "ui-sortable-placeholder")
+			if(o.placeholder == this.DEFAULT_PLACEHOLDER_CLASS_NAME)
 				o.placeholder = false;
 			
 			var return_val = this._super();
 
 			if(!o.placeholder)
-				o.placeholder == "ui-sortable-placeholder"
+				o.placeholder = this.DEFAULT_PLACEHOLDER_CLASS_NAME;
 
 			return return_val;
 		}
@@ -303,12 +313,12 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 				//Clone placeholder
 				var placeholder_clone = item_obj.item.clone()
-					.removeClass(o.selectedClassName+" ui-sortable-handle")
+					.removeClass(o.selectedClassName+" "+that.SORTABLE_HANDLE_CLASS_NAME)
 					.addClass(o.placeholder)
 					.insertBefore(that.currentItem);
 
 				//Only hide if default placeholder
-				if(o.placeholder == "ui-sortable-placeholder")
+				if(o.placeholder == this.DEFAULT_PLACEHOLDER_CLASS_NAME)
 					placeholder_clone.css("visibility", "hidden")
 
 				//Add this item to this.selected_items
@@ -327,7 +337,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 					//current placeholder is moved by _rearrange().
 					placeholders.push(
 						placeholder_clone.clone()
-							.addClass("ui-sortable-placeholder-reference")
+							.addClass(that.PLACEHOLDER_REFERENCE_CLASS_NAME)
 							.css("display", "none")
 							.insertAfter(placeholder_clone)
 					);
@@ -374,7 +384,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		if(o.multiselect && i.item.hasClass(o.placeholder))
 		{
 			i = $.extend(true, {}, i); //Clone i (original is passed by reference)
-			i.item = i.item[this.direction === "up" ? "nextAll" : "prevAll"](".ui-sortable-handle").first();
+			i.item = i.item[this.direction === "up" ? "nextAll" : "prevAll"]("."+this.SORTABLE_HANDLE_CLASS_NAME).first();
 
 			triggeredByPlaceholder = true;
 		}
@@ -394,7 +404,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 				//If we have reached the current placeholder original
 				//position (the reference), then set the nextItem to 
 				//start inserting after the current placeholder.
-				if($(this).hasClass("ui-sortable-placeholder-reference"))
+				if($(this).hasClass(that.PLACEHOLDER_REFERENCE_CLASS_NAME))
 				{
 					nextItem = that.placeholder.next();
 
@@ -412,19 +422,19 @@ $.widget("ui.sortable", $.ui.sortable, {
 					//Move the next item before the placeholders
 					//every time a non-current placeholder is moved to after the 
 					//current placeholder if we are moving up.
-					if(!triggeredByPlaceholder && that.direction === "up" && !$(this).hasClass("ui-sortable-placeholder-reference"))
+					if(!triggeredByPlaceholder && that.direction === "up" && !$(this).hasClass(that.PLACEHOLDER_REFERENCE_CLASS_NAME))
 					{
 						that.placeholder
-							.nextAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
+							.nextAll("."+that.SORTABLE_HANDLE_CLASS_NAME+":not(."+o.selectedClassName+")")
 							.first()
 							.insertAfter(that.placeholder
-											.prevAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
+											.prevAll("."+that.SORTABLE_HANDLE_CLASS_NAME+":not(."+o.selectedClassName+")")
 											.first()
 							);
 					}
 
 					that.placeholder
-						.nextAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
+						.nextAll("."+that.SORTABLE_HANDLE_CLASS_NAME+":not(."+o.selectedClassName+")")
 						.first()
 						.before($(this));
 				}
@@ -436,7 +446,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 					if(!triggeredByPlaceholder && that.direction === "down")
 					{
 						that.placeholder
-							.prevAll(".ui-sortable-handle:not(."+o.selectedClassName+")")
+							.prevAll("."+that.SORTABLE_HANDLE_CLASS_NAME+":not(."+o.selectedClassName+")")
 							.first()
 							.insertAfter(that.placeholder);
 					}
@@ -704,8 +714,8 @@ $.widget("ui.sortable", $.ui.sortable, {
 				var $clone = item_obj.item.clone();
 
 			//Create clone
-			$clone.removeClass("ui-sortable-handle")
-				.addClass("ui-sortable-animation-clone")
+			$clone.removeClass(that.SORTABLE_HANDLE_CLASS_NAME)
+				.addClass(that.ANIMATION_CLONE_CLASS_NAME)
 				.css({
 					position : "absolute",
 					zIndex   : o.zIndex-1
