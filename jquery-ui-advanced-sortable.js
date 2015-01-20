@@ -624,7 +624,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		var that = this;
 		var o = this.options;
-		var $target = $(e.target);
+		var $target = $(e.currentTarget);
 
 		//Deselect everything
 		$.each(this.items, function(indx, item_obj) {
@@ -658,7 +658,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 	_ctrlClick: function(e) {
 
 		var o = this.options;
-		var $target = $(e.target);
+		var $target = $(e.currentTarget);
 
 		//Toggle selection of clicked item
 		$target.toggleClass(o.selectedClassName);
@@ -672,7 +672,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 	_singleClick: function(e) {
 
 		var o = this.options;
-		var $target = $(e.target);
+		var $target = $(e.currentTarget);
 
 		//Deselect everything
 		$.each(this.items, function(indx, item_obj) {
