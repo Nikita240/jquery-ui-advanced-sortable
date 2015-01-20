@@ -106,6 +106,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		this._super(event, overrideHandle, noActivation);
 
 		var o = this.options;
+		var that = this;
 
 		//Initialize animations
 		if(o.animate)
@@ -116,8 +117,20 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Show clones
 			this.animationCloneContainer.css("display", "");
 
-			//Hide originals
-			this.element.css("visibility", "hidden");
+			$(window).load(function() {
+				//Hide originals
+				that.element.css("visibility", "hidden");
+			});
+
+			//Push to the end of the callStack to make sure the animation clones
+			//have time to draw.
+		/*	setTimeout(function() {
+
+				//Hide originals
+				that.element.css("visibility", "hidden");
+			}, 0);*/
+
+
 		}
 	},
 
@@ -241,7 +254,11 @@ $.widget("ui.sortable", $.ui.sortable, {
 		//Move all selected items into the helper
 		$.each(this.selected_items, function(indx, item_obj) {
 
+			//Move selected item into helper
 			$helper.find("> div").append(item_obj.item);
+
+			//Show selected items placeholder
+			item_obj.placeholder_ref.css("display", "");
 
 			//Calculate original position vector
 			var original_vector = that._subtractVectors(
@@ -320,7 +337,8 @@ $.widget("ui.sortable", $.ui.sortable, {
 				var placeholder_clone = item_obj.item.clone()
 					.removeClass(o.selectedClassName+" "+that.SORTABLE_HANDLE_CLASS_NAME)
 					.addClass(o.placeholder)
-					.insertBefore(that.currentItem);
+					.insertBefore(that.currentItem)
+					.css("display", "none");
 
 				//Only hide if default placeholder
 				if(o.placeholder == this.DEFAULT_PLACEHOLDER_CLASS_NAME)
@@ -382,6 +400,10 @@ $.widget("ui.sortable", $.ui.sortable, {
 		var o = this.options;
 		var that = this;
 		var triggeredByPlaceholder = false;
+
+		//Hide originals
+		if(o.animate)
+			this.element.css("visibility", "hidden");
 
 		//If the trigger item is a placeholder,
 		//change the trigger item to the next/prev handle
