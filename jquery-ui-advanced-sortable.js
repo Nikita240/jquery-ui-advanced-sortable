@@ -22,7 +22,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 	},
 
 	// constants
-	
+
 	DEFAULT_ANIMATION_DURATION:           500,
 	DEFAULT_MULTISELECT_DELAY:            150,
 	DEFAULT_PLACEHOLDER_CLASS_NAME:       "ui-sortable-placeholder",
@@ -52,12 +52,12 @@ $.widget("ui.sortable", $.ui.sortable, {
 			if(typeof o.revert === "boolean")
 				o.revert = o.animate;
 
-			this.animationCloneContainer = 
+			this.animationCloneContainer =
 				$("<div>")
 					.attr("class", this.element.attr("class"))
 					.addClass(this.ANIMATION_CLONE_CONTAINER_CLASS_NAME)
 					.css("display", "none");
-			
+
 			//Add container to DOM.
 			//The container has to be a child of the body
 			//because item positions are calculated using the document offset.
@@ -136,12 +136,12 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		//calculate velocity
 		this.v = Math.sqrt(
-					Math.pow(this.lastMouseDragEvent.pageX-event.pageX, 2) 
+					Math.pow(this.lastMouseDragEvent.pageX-event.pageX, 2)
 					+ Math.pow(this.lastMouseDragEvent.pageY-event.pageY, 2)
 				) / (event.timeStamp - this.lastMouseDragEvent.timeStamp);
 
 		this.lastMouseDragEvent = event;
-		
+
 		this._super(event);
 	},
 
@@ -153,8 +153,8 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 *
 	 * Additionally, because of the velocity threshold, it is
 	 * possible for the _super method to get the direction wrong,
-	 * so this will attempt to calculate the direction using 
-	 * element order, and if it fails, it will fallback to 
+	 * so this will attempt to calculate the direction using
+	 * element order, and if it fails, it will fallback to
 	 * the _super's return.
 	 */
 	_intersectsWithPointer: function(item) {
@@ -181,7 +181,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		return intersection;
 	},
-	
+
 	/**
 	 * Override of ui.sortable _createHelper method.
 	 *
@@ -225,10 +225,15 @@ $.widget("ui.sortable", $.ui.sortable, {
 		}
 
 		//Basically, if you grab an unselected item to drag,
-		//it will perform a single click event on the 
+		//it will perform a single click event on the
 		//grabbed item so that we have something selected.
 		if(!this.currentItem.hasClass(o.selectedClassName))
+		{
+			//Bugfix: Mousedown event's currentTarget is the parent window
+			//unlike the mouseups window.
+			e.currentTarget = this.currentItem;
 			this._singleClick(e);
+		}
 
 		//Create placeholders BEFORE we move the items
 		this._createPlaceholder();
@@ -240,7 +245,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 			//Calculate original position vector
 			var original_vector = that._subtractVectors(
-				item_obj, 
+				item_obj,
 				that.offset
 			);
 
@@ -269,7 +274,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 * _createPlaceholder method. Otherwise it will create placeholders
 	 * for all the selected items.
 	 *
-	 * This method should be called before the items are moved into the 
+	 * This method should be called before the items are moved into the
 	 * helper. It uses their positions as a reference to insert the placeholder.
 	 *
 	 * @param {Object} that
@@ -283,7 +288,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Trick the _super into hiding the placeholder
 			if(o.placeholder == this.DEFAULT_PLACEHOLDER_CLASS_NAME)
 				o.placeholder = false;
-			
+
 			var return_val = this._super();
 
 			if(!o.placeholder)
@@ -302,7 +307,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		//Don't reclone placeholders if they already exist
 		if(that.placeholders)
 			return;
-		
+
 		var placeholders = [];
 		this.selected_items = [];
 		$.each(this.items, function(indx, item_obj) {
@@ -368,7 +373,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 	 * placeholders after the default _rearrange() function
 	 * rearranges the current placeholder.
 	 *
-	 * Additionally, if the rearrange is triggered by a 
+	 * Additionally, if the rearrange is triggered by a
 	 * multiselect placeholder, it replaces the i.item
 	 * with the next handle in the DOM.
 	 */
@@ -402,7 +407,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			this.placeholders.each(function() {
 
 				//If we have reached the current placeholder original
-				//position (the reference), then set the nextItem to 
+				//position (the reference), then set the nextItem to
 				//start inserting after the current placeholder.
 				if($(this).hasClass(that.PLACEHOLDER_REFERENCE_CLASS_NAME))
 				{
@@ -420,7 +425,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 				else if(nextItem)
 				{
 					//Move the next item before the placeholders
-					//every time a non-current placeholder is moved to after the 
+					//every time a non-current placeholder is moved to after the
 					//current placeholder if we are moving up.
 					if(!triggeredByPlaceholder && that.direction === "up" && !$(this).hasClass(that.PLACEHOLDER_REFERENCE_CLASS_NAME))
 					{
@@ -441,7 +446,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 				else
 				{
 					//Move the previous item after the current placeholder
-					//every time a non-current placeholder is moved to before the 
+					//every time a non-current placeholder is moved to before the
 					//current placeholder if we are moving down.
 					if(!triggeredByPlaceholder && that.direction === "down")
 					{
@@ -538,7 +543,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Show originals
 			this.element.css("visibility", "");
 		}
-	},	
+	},
 
 	/**
 	 * Subtracts position vector b from a.
@@ -634,7 +639,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		var select = false;
 		$.each(this.items, function(indx, item_obj) {
 
-			if(item_obj.item[0] == that.selectBeggining[0] || 
+			if(item_obj.item[0] == that.selectBeggining[0] ||
 				item_obj.item[0] == $target[0])
 			{
 				select = !select;
@@ -684,11 +689,11 @@ $.widget("ui.sortable", $.ui.sortable, {
 		//Mark the clicked item as the "beggining" of shift selects
 		this.selectBeggining = $target;
 	},
-	
+
 	/**
 	 * Refreshes clones of sortable handles to be used for animation.
 	 *
-	 * The clones should be absolutely positioned and be invisible until 
+	 * The clones should be absolutely positioned and be invisible until
 	 * sorting starts.
 	 */
 	_refreshAnimationClones: function(event) {
@@ -698,10 +703,10 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 		//Clean container
 		this.animationCloneContainer.empty();
-		
+
 		//Clone items
 		$.each(this.items, function(indx, item_obj) {
-			
+
 			//If this item has a "selected" class, do not clone
 			/*if(item_obj.item.hasClass(o.selectedClassName))
 				return;*/
@@ -741,7 +746,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		var o = this.options;
 
 		$.each(this.items, function(indx, item_obj) {
-			
+
 			if(!item_obj.animationClone)
 				return;
 
@@ -773,9 +778,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 
 	/**
 	 * Sets the top and left positions of the helpers to be
-	 * at the same vector relative to the current helper as 
+	 * at the same vector relative to the current helper as
 	 * the placeholders.
-	 * 
+	 *
 	 * Does animation if neccessary.
 	 */
 	_syncHelperPositions: function() {
@@ -788,7 +793,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Calculate the delta vector
 			var delta_vector = that._subtractVectors(
 				that.currentItem.position(),
-				that._subtractVectors( 
+				that._subtractVectors(
 					that.placeholder.offset(),
 					item_obj.placeholder_ref.offset()
 				)
