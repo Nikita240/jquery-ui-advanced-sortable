@@ -8,6 +8,8 @@
 - [ ] Multiselect option to disable default selection handlers
 - [ ] Multiselect modes where you can single click and drag select
 - [ ] Soft snap to grid when near drop point
+- [ ] Drag select (this really only works with big margins, the selection has to be started away from item)
+- [ ] Touch multiselect implemented like on touch devices. Holding activates multiselect.
 
 ###Issues
 - [X] placeholders sometimes don't trigger the change
