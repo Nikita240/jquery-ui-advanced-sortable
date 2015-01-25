@@ -117,20 +117,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//Show clones
 			this.animationCloneContainer.css("display", "");
 
-			$(window).load(function() {
-				//Hide originals
-				that.element.css("visibility", "hidden");
-			});
-
-			//Push to the end of the callStack to make sure the animation clones
-			//have time to draw.
-		/*	setTimeout(function() {
-
-				//Hide originals
-				that.element.css("visibility", "hidden");
-			}, 0);*/
-
-
+			//Originals are hidden in _rearrange()
 		}
 	},
 
