@@ -258,6 +258,8 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//enabled, they will move to a new position from where
 			//they started instead of jumping)
 			item_obj.item
+				.width(item_obj.item.width())
+				.height(item_obj.item.height())
 				.css("position", "absolute")
 				.css(original_vector);
 		});
@@ -325,7 +327,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 					.removeClass(o.selectedClassName+" "+that.SORTABLE_HANDLE_CLASS_NAME)
 					.addClass(o.placeholder)
 					.insertBefore(that.currentItem)
-					.css("display", "none");
+					.css("display", "none")
+					.width(item_obj.item.width())
+					.height(item_obj.item.height());
 
 				//Only hide if default placeholder
 				if(o.placeholder == this.DEFAULT_PLACEHOLDER_CLASS_NAME)
@@ -538,7 +542,9 @@ $.widget("ui.sortable", $.ui.sortable, {
 			position : "",
 			top      : "",
 			left     : "",
-			display  : ""
+			display  : "",
+			width    : "",
+			height   : ""
 		});
 
 		var o = this.options;
@@ -723,17 +729,19 @@ $.widget("ui.sortable", $.ui.sortable, {
 			//If this item is the currentItem,
 			//clone the current placeholder instead.
 			if(item_obj.item[0] == that.currentItem[0])
-				var $clone = that.placeholder.clone();
+				var reference_element = that.placeholder;
 			else
-				var $clone = item_obj.item.clone();
+				var reference_element = item_obj.item;
 
 			//Create clone
-			$clone.removeClass(that.SORTABLE_HANDLE_CLASS_NAME)
+			$clone = reference_element.clone().removeClass(that.SORTABLE_HANDLE_CLASS_NAME)
 				.addClass(that.ANIMATION_CLONE_CLASS_NAME)
 				.css({
 					position : "absolute",
 					zIndex   : o.zIndex-1
-				});
+				})
+				.width(reference_element.width())
+				.height(reference_element.height());
 
 			//Store reference
 			item_obj.animationClone = $clone;
