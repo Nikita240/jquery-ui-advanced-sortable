@@ -113,6 +113,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 		{
 			//Sync positions
 			this._syncAnimationClonePositions();
+			this.animationCloneContainer.css("display", "");
 		}
 	},
 
@@ -390,7 +391,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 		//Hide originals and show clones
 		if(o.animate)
 		{
-			this.animationCloneContainer.css("display", "");
 			this.element.css("visibility", "hidden");
 		}
 
@@ -741,7 +741,7 @@ $.widget("ui.sortable", $.ui.sortable, {
 				.addClass(that.ANIMATION_CLONE_CLASS_NAME)
 				.css({
 					position : "absolute",
-					zIndex   : o.zIndex-1
+					zIndex   : -1
 				})
 				.width(reference_element.width())
 				.height(reference_element.height());
