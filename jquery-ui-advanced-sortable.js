@@ -741,7 +741,8 @@ $.widget("ui.sortable", $.ui.sortable, {
 				.addClass(that.ANIMATION_CLONE_CLASS_NAME)
 				.css({
 					position : "absolute",
-					zIndex   : -1
+					zIndex   : -1,
+					margin   : 0
 				})
 				.width(reference_element.width())
 				.height(reference_element.height());
@@ -777,22 +778,22 @@ $.widget("ui.sortable", $.ui.sortable, {
 			else
 				var reference_element = item_obj.item;
 
-			var margins = {
+			/*var margins = {
 				left: (parseInt(reference_element.css("marginLeft"),10) || 0),
 				top: (parseInt(reference_element.css("marginTop"),10) || 0)
 			};
-			var offset_margin_delta = that._subtractVectors(reference_element.offset(), margins);
+			var offset_margin_delta = that._subtractVectors(reference_element.offset(), margins);*/
 
 			//Stop current clone animations
 			item_obj.animationClone.stop(true, false);
 
 			if(animate)
 			{
-				if(offset_margin_delta != item_obj.animationClone.position()) // only animate if the position has changed
-					item_obj.animationClone.animate(offset_margin_delta, o.animate);
+				if(reference_element.offset() != item_obj.animationClone.position()) // only animate if the position has changed
+					item_obj.animationClone.animate(reference_element.offset(), o.animate);
 			}
 			else
-				item_obj.animationClone.css(offset_margin_delta);
+				item_obj.animationClone.css(reference_element.offset());
 		});
 	},
 
