@@ -113,11 +113,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 		{
 			//Sync positions
 			this._syncAnimationClonePositions();
-
-			//Show clones
-			this.animationCloneContainer.css("display", "");
-
-			//Originals are hidden in _rearrange()
 		}
 	},
 
@@ -392,9 +387,12 @@ $.widget("ui.sortable", $.ui.sortable, {
 		var that = this;
 		var triggeredByPlaceholder = false;
 
-		//Hide originals
+		//Hide originals and show clones
 		if(o.animate)
+		{
+			this.animationCloneContainer.css("display", "");
 			this.element.css("visibility", "hidden");
+		}
 
 		//If the trigger item is a placeholder,
 		//change the trigger item to the next/prev handle
