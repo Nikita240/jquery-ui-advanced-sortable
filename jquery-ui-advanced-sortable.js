@@ -533,8 +533,6 @@ $.widget("ui.sortable", $.ui.sortable, {
 		if(this.noSelect)
 			this.currentItem.removeClass(o.selectedClassName);
 
-		this._super(event, noPropagation);
-
 		//Cleanup current item css
 		this.currentItem.css({
 			position : "",
@@ -543,6 +541,13 @@ $.widget("ui.sortable", $.ui.sortable, {
 			display  : "",
 			width    : "",
 			height   : ""
+		});
+
+		this._super(event, noPropagation);
+
+		//Cleanup current item css
+		this.currentItem.css({
+			display  : ""
 		});
 
 		var o = this.options;
